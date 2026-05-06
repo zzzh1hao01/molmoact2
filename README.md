@@ -71,7 +71,14 @@ Note that all of the robotics datasets for pre-training and post-training are in
 
 ## Evaluation
 
-For LIBERO replication and other evaluation instructions, follow the README in the MolmoAct2 LeRobot fork: https://github.com/allenai/lerobot-molmoact2.
+The MolmoAct2 LeRobot fork is included as a Git submodule at `lerobot/`. After cloning this repository, initialize the submodule from the repo root:
+
+```bash
+git submodule update --init --recursive
+cd lerobot
+```
+
+For LIBERO replication and other evaluation instructions, follow the local LeRobot README at [`lerobot/README.md`](lerobot/README.md).
 
 ## Coming Soon
 
