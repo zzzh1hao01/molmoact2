@@ -71,7 +71,14 @@ Note that all of the robotics datasets for pre-training and post-training are in
 
 ## Evaluation
 
-For LIBERO replication and other evaluation instructions, follow the README in the MolmoAct2 LeRobot fork: https://github.com/allenai/lerobot-molmoact2.
+The MolmoAct2 LeRobot fork is included as a Git submodule at `lerobot/`. After cloning this repository, initialize the submodule from the repo root:
+
+```bash
+git submodule update --init --recursive
+cd lerobot
+```
+
+For LIBERO replication and other evaluation instructions, follow the local LeRobot README at `lerobot/README.md` after the submodule is initialized.
 
 ## Coming Soon
 
@@ -79,7 +86,7 @@ Full code for training, fine-tuning, deployment, evaluation, and more details ar
 
 ## License
 
-This model is licensed under Apache 2.0. It is intended for research and educational use in accordance with Ai2's Responsible Use Guidelines (https://allenai.org/responsible-use).
+This model is licensed under Apache 2.0. It is intended for research and educational use in accordance with Ai2's [Responsible Use Guidelines](https://allenai.org/responsible-use).
 
 ## Model and Hardware Safety
 MolmoAct2 generate robot actions from visual observations and language instructions, but their behavior may vary across embodiments, environments, and hardware configurations. Users should carefully validate model outputs before deployment, especially when operating physical robots or other actuated systems. Where possible, actions should be monitored through interpretable intermediate outputs (adaptive depth map), simulation rollouts, action limits, or other safety checks before execution on hardware. The model’s action space should be bounded by the training data, robot controller limits, and task-specific safety constraints, including limits on speed, workspace, torque, and contact force. Users should follow the hardware manufacturer’s safety guidelines, use appropriate emergency-stop mechanisms, and operate the system only in a safely configured environment with human supervision.

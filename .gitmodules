@@ -1,0 +1,4 @@
+[submodule "lerobot"]
+	path = lerobot
+	url = https://github.com/allenai/lerobot
+	branch = molmoact2-hf-inference
