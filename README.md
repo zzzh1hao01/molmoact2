@@ -69,16 +69,20 @@ We also provide fine-tuned checkpoints for common robot platforms and benchmarks
 
 Note that all of the robotics datasets for pre-training and post-training are in LeRobot v3.0 format, paired with extra language annotations.
 
-## Evaluation
+## LeRobot Integration
 
-The MolmoAct2 LeRobot fork is included as a Git submodule at `lerobot/`. After cloning this repository, initialize the submodule from the repo root:
+MolmoAct2 is integrated into LeRobot as a policy implementation, so users can train, evaluate, and deploy MolmoAct2 with standard LeRobot datasets and workflows. This repository includes the LeRobot integration as a Git submodule at `lerobot/`, pinned to the [`allenai/lerobot` `molmoact2-policy` branch](https://github.com/allenai/lerobot/tree/molmoact2-policy).
+
+For training, although all of our experiments start from the base checkpoint [`allenai/MolmoAct2`](https://huggingface.co/allenai/MolmoAct2), we recommend starting from the fine-tuned checkpoints listed in the [Finetuned Models](#finetuned-models) section above if your embodiment is similar to [Bimanual YAM](https://huggingface.co/allenai/MolmoAct2-BimanualYAM), [DROID Franka](https://huggingface.co/allenai/MolmoAct2-DROID), or [SO-100/SO-101](https://huggingface.co/allenai/MolmoAct2-SO100_101), as they can provide better initialization and downstream performance. For generic use, use the base checkpoint.
+
+After cloning this repository, initialize the submodule from the repo root:
 
 ```bash
 git submodule update --init --recursive
 cd lerobot
 ```
 
-For LIBERO replication and other evaluation instructions, follow the local LeRobot README at `lerobot/README.md` after the submodule is initialized.
+For training, evaluation, and deployment instructions, see the MolmoAct2 LeRobot documentation at [`docs/source/molmoact2.mdx`](https://github.com/allenai/lerobot/blob/molmoact2-policy/docs/source/molmoact2.mdx). To reproduce the original LIBERO benchmark results exactly with the v0.5.1 evaluation stack, use the pinned inference branch [`allenai/lerobot:molmoact2-hf-inference`](https://github.com/allenai/lerobot/tree/molmoact2-hf-inference).
 
 ## Real-world Deployment
 
