@@ -117,18 +117,106 @@ Implementation code for setting up, data collection, and inference for Bimanual 
 
 For the Franka setup, we recommend following the official [DROID implementation](https://github.com/droid-dataset/droid) for best results.
 
-## 3. Coming Soon
+## 3. Inference Servers
+
+This repository ships two FastAPI inference servers under `examples/`, one per fine-tuned checkpoint. Each server exposes the same `/act` wire protocol — `json_numpy`-encoded request/response — but with an embodiment-specific schema (camera count, state dimension, normalisation tag).
+
+| Server | Checkpoint | Default port | State dim | Cameras |
+| --- | --- | --- | --- | --- |
+| [`examples/droid/host_server_droid.py`](examples/droid/host_server_droid.py) | [`allenai/MolmoAct2-DROID`](https://huggingface.co/allenai/MolmoAct2-DROID) | `8000` | `(8,) = [q1..q7, gripper]` | `external`, `wrist` |
+| [`examples/yam/host_server_yam.py`](examples/yam/host_server_yam.py) | [`allenai/MolmoAct2-BimanualYAM`](https://huggingface.co/allenai/MolmoAct2-BimanualYAM) | `8202` | `(14,)` (per-arm 7-D × 2 arms) | `top`, `left`, `right` (order matters) |
+
+### 1. Install [uv](https://docs.astral.sh/uv/)
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+exec $SHELL          # reload PATH so the `uv` binary is picked up
+uv --version
+```
+
+### 2. Create the project environment
+
+The pinned dependencies (CUDA-12.1 PyTorch wheels, `transformers`, `fastapi`, `json-numpy`, …) live in `pyproject.toml`. From the repo root:
+
+```bash
+uv sync                  # creates .venv/ and installs all deps
+uv run python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+# expected: True NVIDIA RTX A6000
+```
+
+`uv` reads `.python-version` (3.11) and downloads a matching interpreter if needed. Re-run `uv sync` after pulling new commits.
+
+### 3. Download the checkpoint (~22 GB each)
+
+```bash
+export HF_HUB_ENABLE_HF_TRANSFER=1                       # fast parallel download
+uv run hf download allenai/MolmoAct2-DROID               # for the DROID server
+uv run hf download allenai/MolmoAct2-BimanualYAM         # for the YAM server
+```
+
+To put the cache on a different disk, set `HF_HOME=/path/to/cache` before the download (and when starting the server).
+
+### 4. Start a server
+
+```bash
+# DROID (Franka)
+uv run python examples/droid/host_server_droid.py --host 0.0.0.0 --port 8000 --dtype bfloat16
+
+# Bimanual YAM
+uv run python examples/yam/host_server_yam.py --host 0.0.0.0 --port 8202 --dtype bfloat16
+```
+
+Useful flags (both servers):
+
+- `--dtype bfloat16|float16|float32` — default `bfloat16`. The DROID model card uses `float32` (~88 GB), which only fits on ~96 GB of free VRAM. The YAM model card reports `float32` at ~26 GB (fits on a single A6000), `bfloat16` under 16 GB. `bfloat16` is the safe default for both.
+- `--device cuda:0`
+- `--cuda-graph` — enables CUDA-graph capture for the action expert (~2× faster per call, ~2 GB extra VRAM). Disabled by default so the server coexists with other GPU workloads.
+- `--no-warmup` — skip the dummy forward pass at startup.
+
+#### bf16 patches
+
+Loading in `bfloat16` is not officially supported by the upstream MolmoAct2 code; each server applies two idempotent patches to the cached `modeling_molmoact2.py` at startup:
+
+1. flow-matching trajectory uses the model dtype instead of hardcoded `float32` (otherwise the action expert errors with `mat1 and mat2 must have the same dtype`),
+2. `_to_array` casts to `float32` before `.numpy()` (numpy has no bf16 dtype).
+
+Both are marked with `# patched_bf16_*` comments and re-applied on every server start, so re-downloading the checkpoint won't break things. Newer snapshot revisions (e.g. YAM) have already fixed both upstream; the server will log "needle not found" warnings, which are harmless.
+
+### 5. Reach it from the LAN
+
+Bound to `0.0.0.0`, the server is reachable on every interface of this host. Health check:
+
+```bash
+curl http://<lan-ip>:8000/act
+# DROID: {"status":"ok","repo_id":"allenai/MolmoAct2-DROID","norm_tag":"franka_droid",...}
+
+curl http://<lan-ip>:8202/act
+# YAM:   {"status":"ok","repo_id":"allenai/MolmoAct2-BimanualYAM","norm_tag":"yam_dual_molmoact2","num_cameras":3,"state_dim":14,...}
+```
+
+The wire format (`json_numpy`-encoded request) is documented in the docstring at the top of each server file. The DROID server expects `external_cam`, `wrist_cam`, `instruction`, `state`; the YAM server expects `top_cam`, `left_cam`, `right_cam`, `instruction`, `state`. Both return `actions` (`(N, D)` float32) and `dt_ms`.
+
+### Firewall / port
+
+If clients on the LAN can't connect, open the port locally:
+
+```bash
+sudo ufw allow from <subnet> to any port 8000 proto tcp   # DROID
+sudo ufw allow from <subnet> to any port 8202 proto tcp   # YAM
+```
+
+## 4. Coming Soon
 
 Full code for training, fine-tuning, deployment, evaluation, and more details are coming soon.
 
-## 4. License
+## 5. License
 
 This model is licensed under Apache 2.0. It is intended for research and educational use in accordance with Ai2's [Responsible Use Guidelines](https://allenai.org/responsible-use).
 
-## 5. Model and Hardware Safety
+## 6. Model and Hardware Safety
 MolmoAct2 generate robot actions from visual observations and language instructions, but their behavior may vary across embodiments, environments, and hardware configurations. Users should carefully validate model outputs before deployment, especially when operating physical robots or other actuated systems. Where possible, actions should be monitored through interpretable intermediate outputs (adaptive depth map), simulation rollouts, action limits, or other safety checks before execution on hardware. The model’s action space should be bounded by the training data, robot controller limits, and task-specific safety constraints, including limits on speed, workspace, torque, and contact force. Users should follow the hardware manufacturer’s safety guidelines, use appropriate emergency-stop mechanisms, and operate the system only in a safely configured environment with human supervision.
 
-## 6. Contacts
+## 7. Contacts
 
 For questions, collaborations, or support, please contact with:
 ```
@@ -136,7 +224,7 @@ For questions, collaborations, or support, please contact with:
 ```
 Found a bug or have a feature request? Please open a GitHub issue.
 
-## 7. Citation
+## 8. Citation
 
 ```bibtex
 @misc{fang2026molmoact2actionreasoningmodels,
