@@ -51,6 +51,10 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
+# sim_eval assets (robot meshes, URDFs) — download via sim_eval/scripts/download_assets.py
+sim_eval/assets/
+sim_eval/outputs/
+
 # Scratch / duplicates
 *.tmp
 * copy.*
