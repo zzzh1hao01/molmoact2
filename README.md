@@ -49,6 +49,10 @@ MolmoAct2 is Ai2's open family of action reasoning models for robot control and 
 - **[2026/05/05] 🔥 [MolmoAct2]([https://huggingface.co/collections/allenai/molmoact-689697591a3936fba38174d7](https://allenai.org/blog/molmoact2))** has been released!
 
 
+## Intel XPU Support
+
+MolmoAct2 inference has been validated on Intel XPU (Intel GPUs) and runs **without any code changes** to this repository. Install a PyTorch build with Intel XPU support and select the `xpu` device at runtime.
+
 ## 1. Models
 
 ### Base Models
