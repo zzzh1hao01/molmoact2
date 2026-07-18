@@ -155,6 +155,8 @@ image = (
         f"pip install --no-cache-dir -e '{REMOTE_EXPERIMENTS_DIR}[all]'",
         f"pip install --no-cache-dir -e '{REMOTE_EXPERIMENTS_DIR}/lerobot[async]'",
     )
+    # train_lerobot.py imports debugpy unconditionally; not declared in [all].
+    .pip_install("debugpy")
     .env(
         {
             "HF_HOME": HF_HOME,
