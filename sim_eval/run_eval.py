@@ -5,11 +5,6 @@ MolmoAct2 closed-loop evaluation on ManiSkill environments.
 Usage:
 
     python -m sim_eval.run_eval --policy-type remote-yam --remote-url http://<host>:8202/act -e BimanualYAMPutEverythingInBox-v1
-
-    python -m sim_eval.run_eval --policy-type remote-droid --remote-url http://<host>:8000/act -e DroidPutEverythingInBox-v1
-
-    # Multiple tasks:
-    python -m sim_eval.run_eval --policy-type remote-yam --remote-url http://<host>:8202/act -e BimanualYAMPutEverythingInBox-v1 DroidPutEverythingInBox-v1
 """
 
 import dataclasses
@@ -28,7 +23,7 @@ from tqdm import tqdm
 
 import mani_skill.envs  # noqa: F401
 from .tasks import *  # noqa: F401, F403
-from .inference.client import DroidClient, YAMClient, MolmoActClientBase
+from .inference.client import YAMClient, MolmoActClientBase
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,12 +32,11 @@ EVAL_DIR = Path(__file__).parent
 DEFAULT_OUTPUT_DIR = str(EVAL_DIR / "outputs")
 
 DEFAULT_LANGUAGE_INSTRUCTIONS: dict[str, str] = {
-    "DroidPutEverythingInBox-v1":       "put everything into the box",
     "BimanualYAMPutEverythingInBox-v1": "put everything into the box",
 }
 
 
-PolicyType = Literal["remote-droid", "remote-yam"]
+PolicyType = Literal["remote-yam"]
 
 
 @dataclass
@@ -50,7 +44,7 @@ class EvalConfig:
     """MolmoAct2 closed-loop policy evaluation on ManiSkill."""
 
     policy_type: Annotated[PolicyType, tyro.conf.arg(aliases=["-p"])] = "remote-yam"
-    """'remote-droid' or 'remote-yam'."""
+    """'remote-yam'."""
 
     remote_url: Optional[str] = None
     """Full /act endpoint URL, e.g. http://<host>:8202/act."""
@@ -267,7 +261,7 @@ def main() -> None:
             "  -e BimanualYAMPutEverythingInBox-v1"
         )
 
-    _clients = {"remote-droid": DroidClient, "remote-yam": YAMClient}
+    _clients = {"remote-yam": YAMClient}
     if config.policy_type not in _clients:
         raise SystemExit(f"Unknown --policy-type '{config.policy_type}'. "
                          f"Known: {sorted(_clients.keys())}")

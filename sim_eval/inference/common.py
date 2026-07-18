@@ -18,13 +18,6 @@ class RemoteServerSchema:
 
 
 MOLMOACT2_SCHEMAS: dict[str, RemoteServerSchema] = {
-    "droid": RemoteServerSchema(
-        name="droid",
-        camera_keys=("external_cam", "wrist_cam"),
-        state_dim=8,
-        default_port=8000,
-        norm_tag="franka_droid",
-    ),
     "yam": RemoteServerSchema(
         name="yam",
         camera_keys=("top_cam", "left_cam", "right_cam"),
@@ -39,18 +32,6 @@ StateAdapter  = Callable[[np.ndarray], np.ndarray]
 ActionAdapter = Callable[[np.ndarray], np.ndarray]
 
 _YAM_FINGER_OPEN_RANGE = 0.0475  # matches bimanual_yam.py gripper lower=-0.0475
-
-
-def droid_state_adapter(qpos: np.ndarray) -> np.ndarray:
-    """franka_droid qpos (13-D) → MolmoAct2 DROID state (8-D).
-
-    Active joints: [0..6] fr3 arm, [7] left_outer_knuckle (gripper), [8..12] passive.
-    Server expects: [q1..q7, gripper_pos].
-    """
-    qpos = np.asarray(qpos, dtype=np.float32)
-    if qpos.shape[-1] != 13:
-        raise ValueError(f"droid_state_adapter: expected (13,), got {qpos.shape}")
-    return np.concatenate([qpos[:7], qpos[7:8]])
 
 
 def yam_state_adapter(qpos: np.ndarray) -> np.ndarray:

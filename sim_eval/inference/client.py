@@ -3,7 +3,7 @@ MolmoAct2 inference clients.
 
 MolmoActClientBase — ABC interface (schema, state_adapter, action_adapter).
 _MolmoActHTTPClient — shared HTTP + chunk-buffering implementation.
-DroidClient / YAMClient — concrete embodiment clients.
+YAMClient — concrete embodiment client.
 
 Adding a new embodiment: subclass _MolmoActHTTPClient, set the three
 class attributes (schema, state_adapter, action_adapter). Done.
@@ -18,7 +18,6 @@ import numpy as np
 
 from .common import (
     MOLMOACT2_SCHEMAS,
-    droid_state_adapter,
     yam_state_adapter,
     yam_action_adapter,
     extract_camera,
@@ -135,13 +134,6 @@ class _MolmoActHTTPClient(MolmoActClientBase):
         if actions.ndim == 1:
             actions = actions[None, :]
         return [np.asarray(a) for a in actions]
-
-
-class DroidClient(_MolmoActHTTPClient):
-    """MolmoAct2-DROID client (external_cam + wrist_cam, 8-D state)."""
-    schema         = MOLMOACT2_SCHEMAS["droid"]
-    state_adapter  = staticmethod(droid_state_adapter)
-    action_adapter = None
 
 
 class YAMClient(_MolmoActHTTPClient):

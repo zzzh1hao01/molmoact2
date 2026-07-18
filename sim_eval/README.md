@@ -1,6 +1,6 @@
 # sim_eval — MolmoAct2 Simulation Evaluation
 
-Zero-shot evaluation of [MolmoAct2](https://huggingface.co/allenai/MolmoAct2-DROID) policies inside [ManiSkill](https://github.com/haosulab/ManiSkill) simulation.
+Zero-shot evaluation of [MolmoAct2](https://huggingface.co/allenai/MolmoAct2-BimanualYAM) policies inside [ManiSkill](https://github.com/haosulab/ManiSkill) simulation.
 
 ## Directory layout
 
@@ -8,14 +8,11 @@ Zero-shot evaluation of [MolmoAct2](https://huggingface.co/allenai/MolmoAct2-DRO
 sim_eval/
 ├── run_eval.py          # CLI entry point
 ├── inference/
-│   ├── client.py        # DroidClient / YAMClient (HTTP ↔ /act)
+│   ├── client.py        # YAMClient (HTTP ↔ /act)
 │   └── common.py        # Schemas, state/action adapters, obs helpers
 ├── robots/
-│   ├── franka_droid.py  # Franka FR3 + Robotiq gripper (DROID)
 │   └── bimanual_yam.py  # Bimanual YAM arms (YAM)
 ├── tasks/
-│   ├── droid_tasks/
-│   │   └── droid_put_everything_in_box.py
 │   └── yam_tasks/
 │       └── bimanual_put_everything_in_box.py
 ├── assets/              # Robot meshes / URDFs
@@ -33,7 +30,7 @@ uv sync          # from repo root
 
 **2. Download robot assets**
 
-Assets (URDF meshes for Franka, MJCF files for YAM) are not committed to the repo.
+Assets (MJCF files for YAM) are not committed to the repo.
 Download them once:
 
 ```bash
@@ -53,12 +50,6 @@ uv run python -m sim_eval.run_eval \
     --policy-type remote-yam \
     --remote-url http://<host>:8202/act \
     -e BimanualYAMPutEverythingInBox-v1
-
-# DROID
-uv run python -m sim_eval.run_eval \
-    --policy-type remote-droid \
-    --remote-url http://<host>:8000/act \
-    -e DroidPutEverythingInBox-v1
 ```
 
 Results are written to `sim_eval/outputs/<timestamp>/results.json`.
@@ -68,7 +59,7 @@ Videos and per-episode camera frames are saved alongside.
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--policy-type` / `-p` | `remote-yam` | `remote-droid` or `remote-yam` |
+| `--policy-type` / `-p` | `remote-yam` | `remote-yam` |
 | `--remote-url` | — | Full `/act` endpoint URL (required) |
 | `-e` | — | One or more ManiSkill env IDs |
 | `-n` | `10` | Episodes per task |
@@ -81,7 +72,6 @@ Videos and per-episode camera frames are saved alongside.
 
 | Env ID | Robot | Task |
 |--------|-------|------|
-| `DroidPutEverythingInBox-v1` | Franka FR3 + Robotiq | Pick lego duplo + tennis ball → box |
 | `BimanualYAMPutEverythingInBox-v1` | Bimanual YAM | Pick lego duplo + tennis ball → box |
 
 ## Adding a new task
