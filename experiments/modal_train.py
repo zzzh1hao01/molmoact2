@@ -148,6 +148,10 @@ image = (
             "**/.venv",
             "checkpoints/**",
             "wandb/**",
+            # This app file is auto-mounted by `modal run`; excluding it from
+            # the copied source keeps edits here from invalidating the
+            # editable-install layer (a ~10 min rebuild per edit otherwise).
+            "modal_train.py",
         ],
     )
     .run_commands(
@@ -399,7 +403,14 @@ def main(
             f"reserves {GPU_TYPE}:{N_GPUS}; use MODAL_TRAIN_GPUS=1 to reserve one GPU."
         )
     if not exp_name:
-        exp_name = "molmoact2-yam-fold-smoke" if smoke else "molmoact2-yam-fold-lora"
+        # Timestamp smoke runs: reusing a save_folder makes the trainer try to
+        # hard-resume its recorded wandb run id, which fails if that id came
+        # from an offline run (resume='must' on a server-unknown id).
+        exp_name = (
+            f"molmoact2-yam-fold-smoke-{time.strftime('%m%d-%H%M%S')}"
+            if smoke
+            else "molmoact2-yam-fold-lora"
+        )
     if not steps:
         steps = SMOKE_STEPS if smoke else DEFAULT_STEPS
 
