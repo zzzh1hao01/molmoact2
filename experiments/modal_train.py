@@ -9,9 +9,10 @@ One-time setup::
 
     pip install modal && modal setup
     modal secret create huggingface HF_ACCESS_TOKEN=hf_...   # private dataset pull
-    modal secret create wandb WANDB_API_KEY=...              # dummy value is fine if you
-                                                             # run without --wandb-entity
-                                                             # (falls back to WANDB_MODE=offline)
+    modal secret create wandb WANDB_API_KEY=...              # logs to
+                                                             # zhihaoteo-brown-university/hackathon
+                                                             # by default; pass --wandb-entity ""
+                                                             # to force WANDB_MODE=offline
 
 First run — smoke test (Phase 3: 1 GPU, 20 steps, README "Smoke Test" recipe
 with ``--packing=false --dynamic_seq_len=true``)::
@@ -378,8 +379,8 @@ def main(
     global_batch_size: int = 64,
     save_interval: int = 1000,
     resume_from: str = "",
-    wandb_entity: str = "",
-    wandb_project: str = "",
+    wandb_entity: str = "zhihaoteo-brown-university",
+    wandb_project: str = "hackathon",
     gpus: int = 0,
 ):
     """Launch fine-tuning (or a --smoke run) on Modal. See the module docstring."""
