@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 from launch_scripts.data_constants import (
@@ -374,6 +375,49 @@ def build_molmoact2_yam() -> Tuple[List[RawMixtureEntry], Dict[str, Dict[str, ob
     )
 
 
+# SO100-teleop laundry-folding dataset collected on the bimanual YAM rig
+# (Phase 3 of YAM/docs/so100_collection_finetune_plan.md).
+#
+# TODO(PLACEHOLDER): "zhihaoteo" is a placeholder HF account — this dataset does
+# not exist yet. After collection, update this to the real HF dataset repo id
+# produced by the collection pipeline's auto-upload (gello_software
+# `lerobot.hf_repo_id`, e.g. "<your-hf-user>/hackathon").
+# It can also be overridden at launch time via the YAM_FOLD_REPO_ID environment
+# variable (used by experiments/modal_train.py --dataset-repo-id).
+YAM_FOLD_REPO_ID = os.environ.get(
+    "YAM_FOLD_REPO_ID", "zhihaoteo/hackathon"
+)
+
+
+def build_molmoact2_yam_fold() -> Tuple[List[RawMixtureEntry], Dict[str, Dict[str, object]]]:
+    """Single-dataset fine-tuning mixture for the SO100-teleop YAM folding data.
+
+    Mirrors ``build_molmoact2_yam`` exactly — same norm tag (so the
+    ``allenai/MolmoAct2-BimanualYAM`` checkpoint's ``yam_dual_molmoact2`` norm
+    stats and the inference server's ``NORM_TAG`` keep matching), same camera
+    keys, horizons, and control mode — but points at the newly collected
+    dataset only.
+    """
+    return build_single_lerobot_mixture(
+        name="yam_fold",
+        # Reuse the checkpoint's norm tag; do NOT create a new tag here.
+        tag="yam_dual_molmoact2",
+        repo_ids=[YAM_FOLD_REPO_ID],
+        action_key="action",
+        state_keys=["observation.state"],
+        camera_keys=[
+            "observation.images.top",
+            "observation.images.left",
+            "observation.images.right",
+        ],
+        normalize_gripper=False,
+        setup_type="bimanual yam robotic arms in molmoact2",
+        control_mode="absolute joint pose",
+        action_horizon=30,
+        n_action_steps=30,
+    )
+
+
 def build_molmoact2_so100_so101() -> Tuple[List[RawMixtureEntry], Dict[str, Dict[str, object]]]:
     return build_single_lerobot_mixture(
         name="so100_so101",
@@ -395,5 +439,6 @@ MOLMOACT2_LEROBOT_MIXTURES: Dict[str, MixtureBuilder] = {
     "libero": build_molmoact2_libero,
     "libero_goal": build_molmoact2_libero_goal,
     "yam": build_molmoact2_yam,
+    "yam_fold": build_molmoact2_yam_fold,
     "so100_so101": build_molmoact2_so100_so101,
 }
