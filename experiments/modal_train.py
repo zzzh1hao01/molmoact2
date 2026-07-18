@@ -95,6 +95,8 @@ image = (
     modal.Image.from_registry(CUDA_BASE, add_python="3.12")
     .apt_install(
         "build-essential",
+        "clang",  # Modal's add_python interpreter was built with clang; its
+                  # sysconfig emits clang++ link commands (flash-attn link step)
         "cmake",
         "curl",
         "git",
