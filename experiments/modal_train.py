@@ -157,6 +157,16 @@ image = (
     )
     # train_lerobot.py imports debugpy unconditionally; not declared in [all].
     .pip_install("debugpy")
+    # torchaudio was unpinned and resolved to 2.11.0+cu128 against the pinned
+    # torch 2.10.0 -> ABI mismatch (undefined symbol torch_dtype_float4_e2m1fn_x2
+    # loading libtorchaudio). Realign as a final layer to keep the flash-attn
+    # layer cache; --no-deps so torch itself is untouched.
+    # TODO: fold torchaudio==2.10.0 into the base torch pip_install on the next
+    # unavoidable full rebuild.
+    .run_commands(
+        "pip install --no-cache-dir --force-reinstall --no-deps "
+        f"'torchaudio==2.10.0' --index-url {TORCH_INDEX_URL}"
+    )
     .env(
         {
             "HF_HOME": HF_HOME,
