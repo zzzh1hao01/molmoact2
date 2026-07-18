@@ -38,6 +38,22 @@
 MolmoAct2 is Ai2's open family of action reasoning models for robot control and real-world deployment. It builds on the Molmo2-ER embodied-reasoning vision-language backbone, adds robot state and action modeling, and connects the VLM to a flow-matching continuous action expert for closed-loop manipulation. The release includes base checkpoints for continued training, fine-tuned robot policies for evaluation and deployment, and the datasets used to build MolmoAct2 and Molmo2-ER.
 
 ---
+### This fork: SO100-teleop YAM data collection + fine-tuning
+
+This fork adds a laundry-folding fine-tuning pipeline for the bimanual YAM,
+teleoperated with SO100 leader arms:
+
+- **[`COLLECTION_QUICKSTART.md`](COLLECTION_QUICKSTART.md)** — start here on the rig:
+  fresh-laptop setup, config placeholders, per-boot startup, collection, and validation
+  (collection code lives in the [`YAM/`](https://github.com/zzzh1hao01/YAM) submodule —
+  clone with `--recurse-submodules`).
+- **[`experiments/modal_train.py`](experiments/modal_train.py)** — fine-tune
+  `allenai/MolmoAct2-BimanualYAM` on the collected dataset via Modal (usage in the
+  module docstring; smoke test with `--smoke`).
+- **[`YAM/docs/so100_collection_finetune_plan.md`](YAM/docs/so100_collection_finetune_plan.md)**
+  — the end-to-end plan and design decisions behind both.
+
+---
 ### Updates
 - **[2026/06/13]** 🔥 We have released pre-training and post-training code and full experimental details for MolmoAct2, get started [**Here**](https://github.com/allenai/molmoact2/tree/main/experiments).
 - **[2026/06/10]** 🔥 We have setup zero-shot evaluation for MolmoAct2 (DROID and Bimanual YAM) on Maniskill simulation, get started [**Here**](https://github.com/allenai/molmoact2/tree/main/sim_eval).
