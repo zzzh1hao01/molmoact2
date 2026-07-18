@@ -304,6 +304,12 @@ def train(
     if dataset_repo_id:
         env["YAM_FOLD_REPO_ID"] = dataset_repo_id
 
+    # Required by olmo/data/get_dataset.py even for lerobot-only mixtures
+    # (README setup: `export MOLMO_DATA_DIR=...`). Nothing is read from it for
+    # yam_fold; an empty volume dir satisfies the lookup.
+    env.setdefault("MOLMO_DATA_DIR", f"{VOLUME_MOUNT}/molmo_data")
+    os.makedirs(env["MOLMO_DATA_DIR"], exist_ok=True)
+
     # W&B config resolves entity/project from the dotlist overrides below; if
     # none are given, log offline so no valid WANDB_API_KEY is required.
     if not (wandb_entity and wandb_project):
