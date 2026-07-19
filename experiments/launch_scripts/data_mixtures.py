@@ -375,27 +375,22 @@ def build_molmoact2_yam() -> Tuple[List[RawMixtureEntry], Dict[str, Dict[str, ob
     )
 
 
-# SO100-teleop laundry-folding dataset collected on the bimanual YAM rig
-# (Phase 3 of YAM/docs/so100_collection_finetune_plan.md).
-#
-# TODO(PLACEHOLDER): "zhihaoteo" is a placeholder HF account — this dataset does
-# not exist yet. After collection, update this to the real HF dataset repo id
-# produced by the collection pipeline's auto-upload (gello_software
-# `lerobot.hf_repo_id`, e.g. "<your-hf-user>/hackathon").
-# It can also be overridden at launch time via the YAM_FOLD_REPO_ID environment
+# SO101-teleop dataset collected on the bimanual YAM rig with the
+# YamDualArmController pipeline (episode recorder + convert_to_lerobot.py).
+# It can be overridden at launch time via the YAM_FOLD_REPO_ID environment
 # variable (used by experiments/modal_train.py --dataset-repo-id).
 YAM_FOLD_REPO_ID = os.environ.get(
-    "YAM_FOLD_REPO_ID", "zhihaoteo/hackathon"
+    "YAM_FOLD_REPO_ID", "Shivakumr/yams"
 )
 
 
 def build_molmoact2_yam_fold() -> Tuple[List[RawMixtureEntry], Dict[str, Dict[str, object]]]:
     """Single-dataset fine-tuning mixture for the SO100-teleop YAM folding data.
 
-    Mirrors ``build_molmoact2_yam`` exactly — same norm tag (so the
+    Mirrors ``build_molmoact2_yam`` — same norm tag (so the
     ``allenai/MolmoAct2-BimanualYAM`` checkpoint's ``yam_dual_molmoact2`` norm
     stats and the inference server's ``NORM_TAG`` keep matching), same camera
-    keys, horizons, and control mode — but points at the newly collected
+    order, horizons, and control mode — but points at the newly collected
     dataset only.
     """
     return build_single_lerobot_mixture(
@@ -405,10 +400,17 @@ def build_molmoact2_yam_fold() -> Tuple[List[RawMixtureEntry], Dict[str, Dict[st
         repo_ids=[YAM_FOLD_REPO_ID],
         action_key="action",
         state_keys=["observation.state"],
+        # Key names differ from build_molmoact2_yam because this dataset was
+        # converted with YamDualArmController's ACT-era column names; only the
+        # order feeds the model, and it must be the top / left-wrist(can0) /
+        # right-wrist(can1) order the checkpoint was trained on. On this rig
+        # wrist_2 films the left arm and wrist_1 the right arm, hence
+        # wrist_2 before wrist_1. A dataset converted with
+        # `--format molmoact2` uses top/left/right instead.
         camera_keys=[
             "observation.images.top",
-            "observation.images.left",
-            "observation.images.right",
+            "observation.images.wrist_2",
+            "observation.images.wrist_1",
         ],
         normalize_gripper=False,
         setup_type="bimanual yam robotic arms in molmoact2",
