@@ -405,10 +405,13 @@ def build_molmoact2_yam_fold() -> Tuple[List[RawMixtureEntry], Dict[str, Dict[st
         repo_ids=[YAM_FOLD_REPO_ID],
         action_key="action",
         state_keys=["observation.state"],
+        # The SO100-teleop upload (Shivakumr/yams) names the wrist cameras
+        # wrist_1/wrist_2; they fill the checkpoint's [top, left, right] slots,
+        # so wrist_2 (left arm) comes before wrist_1 (right arm).
         camera_keys=[
             "observation.images.top",
-            "observation.images.left",
-            "observation.images.right",
+            "observation.images.wrist_2",
+            "observation.images.wrist_1",
         ],
         normalize_gripper=False,
         setup_type="bimanual yam robotic arms in molmoact2",

@@ -50,6 +50,11 @@ teleoperated with SO100 leader arms:
 - **[`experiments/modal_train.py`](experiments/modal_train.py)** — fine-tune
   `allenai/MolmoAct2-BimanualYAM` on the collected dataset via Modal (usage in the
   module docstring; smoke test with `--smoke`).
+- **[`SERVING_QUICKSTART.md`](SERVING_QUICKSTART.md)** — serve a fine-tuned
+  checkpoint to the robot over HTTPS via Modal
+  ([`experiments/modal_serve.py`](experiments/modal_serve.py)): find the
+  checkpoint on the volume, deploy, smoke-test, point the YAM eval config at
+  the URL.
 - **[`YAM/docs/so100_collection_finetune_plan.md`](YAM/docs/so100_collection_finetune_plan.md)**
   — the end-to-end plan and design decisions behind both.
 

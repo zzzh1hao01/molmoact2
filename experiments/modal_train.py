@@ -148,10 +148,12 @@ image = (
             "**/.venv",
             "checkpoints/**",
             "wandb/**",
-            # This app file is auto-mounted by `modal run`; excluding it from
-            # the copied source keeps edits here from invalidating the
-            # editable-install layer (a ~10 min rebuild per edit otherwise).
+            # The Modal app files are auto-mounted by `modal run`/`modal
+            # deploy`; excluding them from the copied source keeps edits to
+            # them from invalidating the editable-install layer (a ~10 min
+            # rebuild per edit otherwise).
             "modal_train.py",
+            "modal_serve.py",
         ],
     )
     .run_commands(

@@ -58,3 +58,7 @@ sim_eval/outputs/
 # Scratch / duplicates
 *.tmp
 * copy.*
+
+# Local artifacts — never commit
+weights/
+recordings/
